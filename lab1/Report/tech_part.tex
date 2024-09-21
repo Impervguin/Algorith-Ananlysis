@@ -1,0 +1,114 @@
+\chapter{Технологическая часть}
+\section{Средства разработки}
+
+В качестве языка программирования был выбран python3 \cite{python3}, так как в его стандартной библиотеке присутсвуют функции замера процессорного времени, которые требуются в условиях, а также данный язык обладающий множеством инструментов для визуализации и работы с данными и таблицами.
+
+Для основного файла был выбран инструмент jupyter notebook \cite{python3-jupyter}, так как он позволяет организовать код в удобные блоки,  а также выводить данные и графики прямо в нём, что позволяет легко продемонстрировать все замеры.
+
+Для построения графиков использовалась библиотека plotly  \cite{python3-plotly}.
+
+Для замера времени использовалась функция process\_time\_ns из стандартного модуля time \cite{python3-time}.
+
+Для замеров памяти использовалась функция get\_traced\_memory стандартного модуля tracemalloc \cite{tracemalloc}, которая получает текущую и пиковую выделенную память относительно начала замера.
+
+\section{Реализация алгоритмов}
+
+\begin{lstlisting}[label=recursive-levenshtein,caption={Рекурсивный алгоритм нахождения расстояния Левенштейна}]
+def RecursiveLevenshtein(s1, s2):
+	if len(s1) == 0:
+		return len(s2)
+	if len(s2) == 0:
+		return len(s1)
+	if s1[0] == s2[0]:
+		return RecursiveLevenshtein(s1[1:], s2[1:])
+		return 1 + min(
+	RecursiveLevenshtein(s1[1:], s2),
+	RecursiveLevenshtein(s1[1:], s2[1:]),
+	RecursiveLevenshtein(s1, s2[1:])
+	)
+\end{lstlisting}
+
+\begin{lstlisting}[label=cache-levenshtein,caption={Итерационный алгоритм нахождения расстояния Левенштейна с кешэм}]
+	def CacheLevenshtein(s1, s2):
+		cacheRows = len(s1) + 1
+		cacheCols = len(s2) + 1
+		cache = [[0] * cacheCols for _ in range(cacheRows)]
+		for i in range(1, cacheCols):
+			cache[0][i] = i
+		for i in range(1, cacheRows):
+			cache[i][0] = i
+		
+		for i in range(1, cacheRows):
+			for j in range(1, cacheCols):
+				cache[i][j] = min(cache[i - 1][j] + 1, cache[i - 1][j - 1]  + (0 if s1[i - 1] == s2[j - 1] else 1), cache[i][j - 1] + 1)
+		
+		return cache[cacheRows - 1][cacheCols - 1]
+	)
+\end{lstlisting}
+
+\begin{lstlisting}[label=cache-damerau-levenshtein,caption={Итерационный алгоритм нахождения расстояния Дамерау-Левенштейна с кешэм}]
+	def CacheDamerauLevenshtein(s1, s2):
+		cacheRows = len(s1) + 1
+		cacheCols = len(s2) + 1
+		cache = [[0] * cacheCols for _ in range(cacheRows)]
+		for i in range(1, cacheCols):
+			cache[0][i] = i
+		for i in range(1, cacheRows):
+			cache[i][0] = i
+		for i in range(1, cacheRows):
+			for j in range(1, cacheCols):
+				if i >= 2 and j >= 2 and s1[i - 1] == s2[j - 2] and s1[i - 2] == s2[j - 1]:
+					cache[i][j] = min(
+						cache[i - 1][j] + 1,
+						cache[i - 1][j - 1] + (0 if s1[i - 1] == s2[j - 1] else 1),
+						cache[i - 2][j - 2] + 1,
+						cache[i][j - 1] + 1,
+						)
+				else:
+					cache[i][j] = min(
+						cache[i - 1][j] + 1,
+						cache[i - 1][j - 1] + (0 if s1[i - 1] == s2[j - 1] else 1),
+						cache[i][j - 1] + 1,
+						)
+		
+		return cache[cacheRows - 1][cacheCols - 1]
+\end{lstlisting}
+
+\section{Функциональные тесты}
+
+В табличке приведены тесты для алгоритмов расстояние Левенштейна и Дамерау Левенштейна.
+
+\begin{table}[ht]
+	\small
+	\begin{center}
+		\begin{threeparttable}
+			\caption{Функциональные тесты}
+			\label{tbl:func_tests}
+			\begin{tabular}{|c|c|c|c|c|c|c|}
+				\hline
+				\multicolumn{2}{|c|}{\bfseries Входные данные}
+				& \multicolumn{5}{c|}{\bfseries Расстояния и алгоритм} \\ 
+				\hline
+				&
+				&
+				\multicolumn{3}{c|}{Левенштейн} & \multicolumn{2}{c|}{Дамерау-Левенштейн} \\ \cline{3-7}
+				Строка 1 & Строка 2 & Рекурсивный & С кешем &  Ожидаемое & С кешем & Ожидаемое \\
+				\hline
+				дмитрий & андрей & 5 & 5 & 5 & 5 & 5 \\
+				\hline
+				река & мука & 2 & 2 & 2 & 2 & 2 \\
+				\hline
+				1234 & 2134 & 3 & 3 & 3 & 2 & 2 \\
+				\hline
+			\end{tabular}	
+		\end{threeparttable}
+	\end{center}
+\end{table}
+
+Все тесты пройдены успешно
+
+\section*{Вывод}
+
+В ходе работы были разработаны алгоритмы поиска расстояния Левенштейна и Дамерау-Левенштейна, а также проведено их тестирование.
+
+\clearpage

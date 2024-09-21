@@ -52,10 +52,3 @@ def CacheDamerauLevenshtein(s1, s2):
 
     return cache[cacheRows - 1][cacheCols - 1]
 
-
-
-
-
-
-
-
