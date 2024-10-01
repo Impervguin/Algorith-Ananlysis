@@ -1,0 +1,110 @@
+\chapter{Технологическая часть}
+\section{Средства разработки}
+
+В качестве языка программирования был выбран python3 \cite{python3}, так как данный язык обладает множеством инструментов для визуализации данных и работы с ними.
+
+Для основного файла был выбран инструмент jupyter notebook \cite{python3-jupyter}, так как он позволяет организовать код в удобные блоки,  а также выводить данные и графики прямо в нём, что позволяет легко продемонстрировать все исследования.
+
+Для построения графиков использовалась библиотека plotly \cite{python3-plotly}.
+
+\section{Реализация алгоритмов}
+
+В листинге \ref{linear-search} представлена реализация алгоритма линейного поиска, а в листинге \ref{binary-search} – реализация бинарного поиска. В каждый из этих алгоритмов был добавлен счётчик сравнений в теле цикла, при этом в линейном поиске это счётчик увеличивает на 1 за итерацию, а в бинарном поиске может увеличиться на 1 или 2, в зависимости от отношения текущего элемента с искомым.
+
+\begin{lstlisting}[label=linear-search,caption={Алгоритм линейного поиска}]
+	def SimpleSearch(array: list[int], element: int) -> tuple[int, int]:
+		comparisonCount = 0
+		for i in range(len(array)):
+			comparisonCount += 1
+			if array[i] == element:
+				return i, comparisonCount
+	return -1, comparisonCount
+\end{lstlisting}
+
+\begin{lstlisting}[label=binary-search,caption={Алгоритм бинарного поиска}]
+	def BinarySearch(array: list[int], element: int) -> tuple[int, int]:
+		left = 0
+		right = len(array) - 1
+		comparisonCount = 0
+	
+		while left <= right:
+			mid = (left + right) // 2
+	
+			if array[mid] < element:
+				comparisonCount += 1
+				left = mid + 1
+			elif array[mid] > element:
+				right = mid - 1
+				comparisonCount += 2
+			else:
+				comparisonCount += 2
+				return mid, comparisonCount
+	
+	return -1, comparisonCount
+\end{lstlisting}
+
+\section{Функциональные тесты}
+
+При тестирования было выделено три вида тестов:
+\begin{enumerate}
+	\item Массив пустой;
+	\item Искомого элемента в массиве нет;
+	\item Искомы элемент есть в массиве.
+\end{enumerate}
+
+Для тестирования пунктов 1 и 2 были написаны отдельные тесты, а для пункта 3 использовалась следующая система: создавался массив целых чисел размером 1000 элементов с элемента $1,\dots,1000$ в порядке возрастания. Затем создавалась копия этого массива и перемешивалась случайным образом. Затем каждый элемент из перемешанной копии искался в исходном массиве линейным поиском и бинарным поиском, при этом значения функций сравнивались с методом list.index \cite{python3-list} из стандартной библиотеки python3, который ищет индекс элемента в массиве.
+
+Для перемешивания массива была использована функция shuffle из стандартного модуля random \cite{python3-shuffle}.
+
+Код тестирования приведён на листинге \ref{testing}.
+
+\begin{lstlisting}[label=testing,caption={Тестирование функций поиска}]
+testSize = 1000
+
+array = [i for i in range(1, testSize + 1)]
+
+# Поиск в пустом массиве
+if SimpleSearch([], 2)[0] != -1:
+	print("Error on empty array with SimpleSearch!")
+	exit(1)
+
+if BinarySearch([], 2)[0] != -1:
+	print("Error on empty array with BinarySearch!")
+	exit(1)
+
+print("Empty array test passed!")
+
+# Поиск несуществующего элемента
+if SimpleSearch(array, testSize + 1000)[0] != -1:
+	print("Error on not existing element with SimpleSearch!")
+	exit(1)
+
+if BinarySearch([], testSize + 1000)[0] != -1:
+	print("Error on not existing element with BinarySearch!")
+	exit(1)
+
+print("Not existing element test passed!")
+
+# Поиск всех элементов массива
+arrcp = array.copy()
+shuffle(arrcp)
+for el in arrcp:
+	index, _ = SimpleSearch(array, el)
+    if index != array.index(el):
+		print(f"Error on element {el} with SimpleSearch!")
+		break
+	index, _ = BinarySearch(array, el)
+	if index != array.index(el):
+		print(f"Error on element {el} with BinarySearch!")
+		break
+else:
+	print("All positive tests passed!")
+\end{lstlisting}
+
+Все тесты пройдены успешно.
+
+\section*{Вывод}
+
+В ходе технологической части работы были разработаны алгоритмы линейного поиска и бинарного поиска на языке python3, а также проведено их функциональное тестирование.
+
+\clearpage

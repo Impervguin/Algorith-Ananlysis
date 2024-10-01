@@ -22,7 +22,7 @@ def BinarySearch(array: list[int], element: int) -> tuple[int, int]:
             right = mid - 1
             comparisonCount += 2
         else:
-            comparisonCount += 3
+            comparisonCount += 2
             return mid, comparisonCount
 
     return -1, comparisonCount
