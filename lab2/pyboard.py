@@ -1,3 +1,6 @@
+import urandom as r
+import utime as t
+
 def SimpleMatrixMultiply(m1: list[list[int]], m2: list[list[int]]):
     if len(m1[0]) != len(m2):
         raise ValueError("Matrices cannot be multiplied")
@@ -85,31 +88,50 @@ def OptimizedVinogradMatrixMultiply(m1: list[list[int]], m2: list[list[int]]):
 
 
 
-if __name__ == '__main__':
-    mat1 = [
-        [1, 2, 3, 2],
-        [4, 5, 6, 4],
-        [7, 8, 9, 2],
-        [1, 32, 12, 43]
-    ]
+RANDMAX = 10000
+RANDMIN = -10000
+def RandomMatrix(n, m):
+    return [[r.randint(-10000, 10000)] * m for _ in range(n)]
 
-    mat2 = [
-        [16, 24, 23, 15],
-        [23, 56, 12, 43],
-        [12, 54, 65, 21],
-        [1, 32, 12, 43]
-    ]
+# REPEATCOUNT = 20
+# REPEATCOUNT = 10
+REPEATCOUNT = 3
+# Памяти на все тесты за раз на плате не хватает, выдаёт ошибку
+# Поэтому разобьём тесты на несколь запусков
+# SIZES = [5, 10, 15, 20, 25]
+# SIZES = [30, 35]
+# SIZES = [40]
+# SIZES = [45]
+SIZES = [50]
 
-    res1 = SimpleMatrixMultiply(mat1, mat2)
-    res2 = VinogradMatrixMultiply(mat1, mat2)
-    res3 = OptimizedVinogradMatrixMultiply(mat1, mat2)
 
-    for i in range(len(res1)):
-        print(*res1[i])
-    print()
-    for i in range(len(res2)):
-        print(*res2[i])
+print("size\tstd\tvin\topt\trepeat")
+for size in SIZES:
+    tstd = 0
+    tvin = 0
+    topt = 0
+    for _ in range(REPEATCOUNT):
+        mat1 = RandomMatrix(size, size)
+        mat2 = RandomMatrix(size, size)
 
-    print()
-    for i in range(len(res3)):
-        print(*res3[i])
+        start = t.ticks_ms()
+        res = SimpleMatrixMultiply(mat1, mat2)
+        end = t.ticks_ms()
+        tstd += t.ticks_diff(end, start)
+
+        start = t.ticks_ms()
+        res = VinogradMatrixMultiply(mat1, mat2)
+        end = t.ticks_ms()
+        tvin += t.ticks_diff(end, start)
+
+        start = t.ticks_ms()
+        res = OptimizedVinogradMatrixMultiply(mat1, mat2)
+        end = t.ticks_ms()
+        topt += t.ticks_diff(end, start)
+    tstd /= REPEATCOUNT
+    # tstd //= 1_000_000
+    tvin /= REPEATCOUNT
+    # tvin //= 1_000_000
+    topt /= REPEATCOUNT
+    # topt //= 1_000_000
+    print(f"{size}\t{tstd:.3g}\t{tvin:.3g}\t{topt:.3g}\t{REPEATCOUNT}")
