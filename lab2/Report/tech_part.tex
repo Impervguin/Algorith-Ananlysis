@@ -1,0 +1,113 @@
+\chapter{Технологическая часть}
+\section{Средства разработки}
+
+В качестве языка программирования был выбран python3 \cite{python3}, так как в его стандартной библиотеке присутствуют функции замера процессорного времени, которые требуются в условиях, а также данный язык обладает множеством инструментов для работы с данными.
+В частности была взята его реализация micropython \cite{micropython}, которая разработана для работы с микроконтроллерами, на которых планировалось проводить замеры.
+
+Для файла с графиком был выбран инструмент jupyter notebook \cite{python3-jupyter}, так как он позволяет организовать код в удобные блоки,  а также выводить данные и графики прямо в нём, что позволяет легко продемонстрировать все замеры.
+
+Для построения графиков использовалась библиотека plotly \cite{python3-plotly}.
+
+Для замера времени использовалась функция ticks\_ms() из стандартного модуля utime \cite{python3-utime} для micropython.
+
+\section{Реализация алгоритмов}
+
+В листингах \ref{stdpy}–\ref{vinpy} приведены реализации разработанных в конструкторской части алгоритмов(рисунки \ref{standard}–\ref{ovinpy}).
+
+\begin{lstlisting}[label=stdpy,caption={Стандартный алгоритм умножения матриц}]
+	def SimpleMatrixMultiply(m1: list[list[int]], m2: list[list[int]]):
+		if len(m1[0]) != len(m2):
+			raise ValueError("Matrices cannot be multiplied")
+		
+		result = [[0] * len(m2[0]) for _ in range(len(m1))]
+		
+		for i in range(len(m1)):
+			for j in range(len(m2[0])):
+				for k in range(len(m2)):
+					result[i][j] += m1[i][k] * m2[k][j]
+		
+		return result
+\end{lstlisting}
+
+\begin{lstlisting}[label=vinpy,caption={Алгоритм умножения матриц Винограда}]
+	def VinogradMatrixMultiply(m1: list[list[int]], m2: list[list[int]]):
+		if (len(m1) == 0 or len(m2) == 0):
+			raise ValueError("Empty matrix")
+		
+		if len(m1[0]) != len(m2):
+			raise ValueError("Matrices cannot be multiplied")
+		
+		M = len(m1)
+		N = len(m1[0]) # == len(m2)
+		Q = len(m2[0])
+		result = [[0] * Q for _ in range(M)]
+		
+		mulH = [0] * (M)
+		for i in range(M):
+			for j in range(N // 2):
+				mulH[i] = mulH[i] + m1[i][2*j] * m1[i][2*j + 1]
+		
+		mulV = [0] * (Q)
+		for i in range(Q):
+			for j in range(N // 2):
+				mulV[i] = mulV[i] + m2[2*j][i] * m2[2*j + 1][i]
+		
+		for i in range(M):
+			for j in range(Q):
+				result[i][j] = -mulH[i] -mulV[j]
+				for k in range(N // 2):
+					result[i][j] = result[i][j] + (m1[i][2*k]+m2[2*k + 1][j]) * (m1[i][2*k + 1]+m2[2*k][j])
+		
+		if (N % 2 != 0):
+			for i in range(M):
+				for j in range(Q):
+					result[i][j] = result[i][j] + m1[i][-1] * m2[-1][j]
+		
+		return result
+\end{lstlisting}
+
+\begin{lstlisting}[label=ovinpy,caption={Оптимизированный алгоритм умножения матриц Винограда}]
+	def OptimizedVinogradMatrixMultiply(m1: list[list[int]], m2: list[list[int]]):
+		if (len(m1) == 0 or len(m2) == 0):
+			raise ValueError("Empty matrix")
+		
+		if len(m1[0]) != len(m2):
+			raise ValueError("Matrices cannot be multiplied")
+		
+		M = len(m1)
+		N = len(m1[0]) # == len(m2)
+		Q = len(m2[0])
+		result = [[0] * Q for _ in range(M)]
+		
+		mulH = [0] * (M)
+		for i in range(M):
+			mulH[i] = m1[i][0] * m1[i][1]
+			for j in range(2, N - 1, 2):
+				mulH[i] += m1[i][j] * m1[i][j + 1]
+		
+		mulV = [0] * (Q)
+		for i in range(Q):
+			mulV[i] = m2[0][i] * m2[1][i]
+			for j in range(2, N - 1, 2):
+				mulV[i] += m2[j][i] * m2[j + 1][i]
+		
+		for i in range(M):
+			for j in range(Q):
+				result[i][j] = -mulH[i] -mulV[j] + (m1[i][0]+m2[1][j]) * (m1[i][1]+m2[0][j])
+				for k in range(2, N - 1, 2):
+					result[i][j] += (m1[i][k]+m2[k + 1][j]) * (m1[i][k + 1]+m2[k][j])
+		
+		if (N % 2 != 0):
+			for i in range(M):
+				for j in range(Q):
+					result[i][j]  += m1[i][-1] * m2[-1][j]
+		
+		return result
+\end{lstlisting}
+
+
+\section*{Вывод}
+
+В ходе технологической части работы были реализованы алгоритмы умножения матриц разработанные в конструкторской части.
+
+\clearpage
