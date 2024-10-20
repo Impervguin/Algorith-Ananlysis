@@ -11,7 +11,12 @@ PARSED_DIR := ./parsed
 
 .PHONY : clean
 clean:
-	rm *.exe $(OUT)/* 2> /dev/null || true
+	rm *.out $(OUT)/* 2> /dev/null || true
+
+.PHONY : clean_parsed
+clean_parsed:
+	rm $(PARSED_DIR)/* 2> /dev/null || true
+
 
 $(OUT)/%.o : $(SRC)/%.c $(INC)/*.h
 	mkdir $(OUT) 2> /dev/null || true
@@ -49,3 +54,8 @@ multithread32.out : $(SRC)/multithreadmain.c $(OUT)/recipeparser.o $(OUT)/downlo
 	mkdir $(PARSED_DIR) 2> /dev/null || true
 	mkdir $(PARSED_DIR)/32 2> /dev/null || true
 	$(CC) $(Cflags) $^ -o $@ $(LIBS) -DRESULT_DIR=\"$(PARSED_DIR)/32\" -DTHREADS=32
+
+multithread64.out : $(SRC)/multithreadmain.c $(OUT)/recipeparser.o $(OUT)/download.o $(OUT)/htmlnode.o $(OUT)/urlstorage.o $(OUT)/urlutils.o $(OUT)/threadqueue.o $(OUT)/gettime.o
+	mkdir $(PARSED_DIR) 2> /dev/null || true
+	mkdir $(PARSED_DIR)/32 2> /dev/null || true
+	$(CC) $(Cflags) $^ -o $@ $(LIBS) -DRESULT_DIR=\"$(PARSED_DIR)/64\" -DTHREADS=64
