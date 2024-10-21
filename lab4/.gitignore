@@ -1,0 +1,15 @@
+# data files
+*.html
+links.txt
+result.txt
+statistics.txt
+
+# C files
+*.o
+*.out
+
+# tex files
+*.aux
+*.log
+*.toc
+*.synctex.gz

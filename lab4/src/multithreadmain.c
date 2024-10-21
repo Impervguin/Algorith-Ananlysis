@@ -10,7 +10,7 @@
 #include "threadqueue.h"
 
 // #define THREADS 8
-#define URLS_PER_THREAD 10
+#define URLS_PER_THREAD 5
 
 #ifndef THREADS 
 #error No threads specified

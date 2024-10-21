@@ -166,3 +166,11 @@ cython_debug/
 *.log
 *.toc
 *.synctex.gz
+
+# C files
+*.out
+*.o
+
+# 4th lab files
+links.txt 
+parsed
