@@ -1,0 +1,33 @@
+services:
+  pgr:
+    container_name: pgr
+    hostname: pgr
+    image: postgres:alpine
+    env_file:
+      - postgres.env
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "100M"
+    networks:
+      - pgr_network
+  
+  
+  mgr:
+    container_name: goose
+    image: ghcr.io/kukymbr/goose-docker:3.22.1
+    restart: on-failure
+    env_file:
+      - postgres.env
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - pgr
+    networks:
+      - pgr_network
+networks:
+  pgr_network:
+    driver: bridge
