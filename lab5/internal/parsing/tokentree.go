@@ -17,6 +17,24 @@ type TokenForest struct {
 	Trees []*TokenNode
 }
 
+// Фронтендеры не закрывают теги на сайти, поэтому эти теги считаются блоками.
+var SelfClosingTokens = map[string]struct{}{
+	"area":   {},
+	"base":   {},
+	"br":     {},
+	"col":    {},
+	"embed":  {},
+	"hr":     {},
+	"img":    {},
+	"input":  {},
+	"link":   {},
+	"meta":   {},
+	"param":  {},
+	"source": {},
+	"track":  {},
+	"wbr":    {},
+}
+
 func newTokenTree(tokenizer *html.Tokenizer, initToken *html.Token) (*TokenNode, error) {
 	var startToken html.Token
 	if initToken == nil {
@@ -31,6 +49,10 @@ func newTokenTree(tokenizer *html.Tokenizer, initToken *html.Token) (*TokenNode,
 
 	nextType := tokenizer.Next()
 	if startToken.Type != html.StartTagToken || nextType == html.ErrorToken {
+		return now, nil
+	}
+	if _, ok := SelfClosingTokens[startToken.Data]; ok {
+		now.StartTag.Type = html.SelfClosingTagToken
 		return now, nil
 	}
 	now.Children = make([]*TokenNode, 0, 1)
@@ -100,7 +122,7 @@ func (root *TokenNode) Find(tag string, attrs map[string]string) *TokenNode {
 }
 
 func (root *TokenNode) FindAll(tag string, attrs map[string]string) []*TokenNode {
-	var result []*TokenNode
+	result := make([]*TokenNode, 0, 10)
 	if root.CheckNode(tag, attrs) {
 		result = append(result, root)
 	}
@@ -108,4 +130,52 @@ func (root *TokenNode) FindAll(tag string, attrs map[string]string) []*TokenNode
 		result = append(result, child.FindAll(tag, attrs)...)
 	}
 	return result
+}
+
+func (root *TokenNode) FindOneChildText() (string, error) {
+	if root.Children == nil || len(root.Children) != 1 {
+		return "", fmt.Errorf("no child nodes found")
+	}
+	child := root.Children[0]
+	if child.StartTag.Type != html.TextToken {
+		return "", fmt.Errorf("no text node found")
+	}
+	return child.StartTag.String(), nil
+}
+
+func (root *TokenNode) FindOneChildNode() *TokenNode {
+	if root.Children == nil || len(root.Children) != 1 {
+		return nil
+	}
+	return root.Children[0]
+}
+
+func (root *TokenNode) GetAttribute(attrName string) (string, bool) {
+	for _, attr := range root.StartTag.Attr {
+		if attr.Key == attrName {
+			return attr.Val, true
+		}
+	}
+	return "", false
+}
+
+var BannedTextTokens = map[string]struct{}{"noscript": {}, "script": {}, "style": {}}
+
+func (root *TokenNode) GetText() (string, error) {
+	var text strings.Builder
+	for _, child := range root.Children {
+		if child.StartTag.Type == html.TextToken {
+			text.WriteString(child.StartTag.String())
+		} else if child.StartTag.Type == html.StartTagToken {
+			if _, ok := BannedTextTokens[child.StartTag.Data]; ok {
+				continue
+			}
+			s, err := child.GetText()
+			if err != nil {
+				return "", err
+			}
+			text.WriteString(s)
+		}
+	}
+	return text.String(), nil
 }
