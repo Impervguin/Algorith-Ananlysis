@@ -20,10 +20,11 @@ type PgsStorage struct {
 
 func DSN() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:5432/%s",
-		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_NAME"))
+		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("LOCAL_POSTGRES_HOST"), os.Getenv("POSTGRES_DB"))
 }
 
 func NewPgsStorage(ctx context.Context) (*PgsStorage, error) {
+	// fmt.Println(DSN())
 	conf, err := pgx.ParseURI(DSN())
 
 	if err != nil {

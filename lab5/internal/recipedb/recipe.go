@@ -17,17 +17,17 @@ type Recipe struct {
 }
 
 const putRecipe = `
-INSERT INTO recipes (id, issue_id, url, title, image_url)
+INSERT INTO recipe (id, issue_id, url, title, image_url)
 VALUES ($1, $2, $3, $4, $5);
 `
 
 const insertIngredient = `
-INSERT INTO ingredients (recipe_id, name, amount, unit)
+INSERT INTO ingredient (recipe_id, name, amount, unit)
 VALUES ($1, $2, $3, $4);
 `
 
 const insertStep = `
-INSERT INTO steps (recipe_id, step_number, step)
+INSERT INTO step (recipe_id, step_number, step)
 VALUES ($1, $2, $3);
 `
 
