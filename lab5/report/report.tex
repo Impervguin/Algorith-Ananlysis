@@ -1,0 +1,19 @@
+\include{preambula}
+
+\begin{document}
+	\include{title}
+	
+	\setcounter{page}{2}
+	
+	\setlength{\cftbeforetoctitleskip}{-4mm}
+	\renewcommand{\contentsname}{\makebox[\textwidth][c]{СОДЕРЖАНИЕ}}
+	\tableofcontents
+	
+
+	\include{main}
+
+	
+	\addcontentsline{toc}{chapter}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+	\renewcommand{\bibname}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+	\include{links}
+\end{document}
