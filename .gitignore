@@ -174,3 +174,9 @@ cython_debug/
 # 4th lab files
 links.txt 
 parsed
+
+# go
+*.sum
+*.exe
+*.json
+lab5/json

@@ -25,9 +25,10 @@ with open(saveTo, "w") as f:
 
         for a in bs.find_all('article'):
             for link in a.find_all('meta', attrs={'itemprop':'url'}):
-                print(link['content'], file=f)
-                links += 1
-                if links >= UpToLinks:
-                    exit(0)
+                if link['content'].startswith("https://menunedeli.ru/recipe"):
+                    print(link['content'], file=f)
+                    links += 1
+                    if links >= UpToLinks:
+                        exit(0)
         page += 1
     
